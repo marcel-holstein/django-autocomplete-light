@@ -105,7 +105,10 @@ class VirtualFieldHandlingMixin(forms.BaseModelForm):
         from django.contrib.contenttypes.models import ContentType
 
         # take care of virtual fields since django doesn't
-        for field in self._meta.model._meta.virtual_fields:
+        virtual_fields = getattr(self._meta.model._meta, 'virtual_fields', [])
+        if not virtual_fields:
+            virtual_fields = getattr(self._meta.model._meta, 'private_fields', [])
+        for field in virtual_fields:
             value = self.cleaned_data.get(field.name, None)
 
             if value:
@@ -502,3 +505,4 @@ def modelform_factory(model, autocomplete_fields=None,
         raise Exception('form kwarg must be an autocomplete_light ModelForm')
 
     return django_modelform_factory(model, **kwargs)
+
